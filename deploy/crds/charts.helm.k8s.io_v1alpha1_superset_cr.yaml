@@ -1,0 +1,109 @@
+apiVersion: charts.helm.k8s.io/v1alpha1
+kind: Superset
+metadata:
+  name: example-superset
+spec:
+  # Default values copied from <project_dir>/helm-charts/superset/values.yaml
+  
+  affinity: {}
+  configFile: |-
+    #---------------------------------------------------------
+    # Superset specific config
+    #---------------------------------------------------------
+    ROW_LIMIT = 5000
+    SUPERSET_WORKERS = 2
+  
+    SUPERSET_WEBSERVER_PORT = 8088
+    #---------------------------------------------------------
+  
+    #---------------------------------------------------------
+    # Flask App Builder configuration
+    #---------------------------------------------------------
+    # Your App secret key
+    SECRET_KEY = '\2\1thisismyscretkey\1\2\e\y\y\h'
+  
+    # The SQLAlchemy connection string to your database backend
+    # This connection defines the path to the database that stores your
+    # superset metadata (slices, connections, tables, dashboards, ...).
+    # Note that the connection information to connect to the datasources
+    # you want to explore are managed directly in the web UI
+    SQLALCHEMY_DATABASE_URI = 'sqlite:////var/lib/superset/superset.db'
+  
+  
+    # Flask-WTF flag for CSRF
+    WTF_CSRF_ENABLED = True
+    # Add endpoints that need to be exempt from CSRF protection
+    WTF_CSRF_EXEMPT_LIST = []
+  
+    # Set this API key to enable Mapbox visualizations
+    MAPBOX_API_KEY = ''
+  deploymentAnnotations: {}
+  extraArguments:
+  - production-mode
+  extraConfigFiles: {}
+  extraEnv: {}
+  extraEnvFromSecret: ""
+  image:
+    pullPolicy: IfNotPresent
+    pullSecrets: []
+    repository: amancevice/superset
+    tag: 0.36.0
+  ingress:
+    annotations: {}
+    enabled: false
+    hosts:
+    - superset.domain.com
+    path: /
+    tls: []
+  initFile: |-
+    if [ "$1" == "development-mode" ]; then
+      /usr/local/bin/superset-init --username admin --firstname admin --lastname user --email admin@fab.org --password admin
+      superset run
+    elif [ "$1" == "production-mode" ]; then
+      superset db upgrade
+      superset init
+      gunicorn \
+          -w 10 \
+          -k gevent \
+          --timeout 300 \
+          -b  0.0.0.0:8088 \
+          --limit-request-line 0 \
+          --limit-request-field_size 0 \
+          "superset.app:create_app()"
+    else
+      echo "You need to specify which mode to start in by setting production-mode"
+      echo "or development-mode in extraArguments."
+      exit 1
+    fi
+  livenessProbe:
+    failureThreshold: 2
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 80
+    periodSeconds: 10
+    timeoutSeconds: 5
+  nodeSelector: {}
+  persistence:
+    accessModes:
+    - ReadWriteOnce
+    enabled: false
+    existingClaim: ""
+    size: 8Gi
+  readinessProbe:
+    failureThreshold: 2
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+  replicaCount: 1
+  resources: {}
+  service:
+    annotations: {}
+    loadBalancerSourceRanges: []
+    port: 9000
+    type: ClusterIP
+  tolerations: []
+  

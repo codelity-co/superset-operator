@@ -1,0 +1,54 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  creationTimestamp: null
+  name: superset-operator
+rules:
+
+# Allowed actions on CRD
+- apiGroups: ["charts.helm.k8s.io"]
+  resources: ["supersets", "supersets/status"]
+  verbs: ["get", "list", "create", "update", "delete", "watch"]
+
+# Allow special aactions
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["get", "list", "create", "update", "delete", "patch", "watch"]
+# - apiGroups: ["policy"]
+#   resources: ["poddisruptionbudgets"]
+#   verbs: ["get", "list", "create", "update", "delete", "patch", "watch"]
+
+# Allowed actions on Pods
+- apiGroups: [""]
+  resources: ["pods","pods/exec", "pods/log"]
+  verbs: ["get", "list", "create", "update", "delete", "patch", "watch"]
+
+# Allowed actions on apps
+- apiGroups: ["apps"]
+  resources: ["*"]
+  verbs: ["get", "list", "create", "update", "delete", "patch", "watch"]
+
+# Allowed actions on Services
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["get", "list", "create", "update", "delete", "patch", "watch"]
+
+# Allowed actions on Secrets
+- apiGroups: [""]
+  resources: ["secrets", "configmaps"]
+  verbs: ["get", "list", "create", "update", "delete", "patch", "watch"]
+
+# Allow all actions on Service Accounts
+- apiGroups: [""]
+  resources: ["serviceaccounts", "serviceaccounts/token"]
+  verbs: ["get", "list", "create", "update", "delete", "patch", "watch"]
+
+# Allow all for Role and Role Binding
+- apiGroups: ["rbac.authorization.k8s.io"]
+  resources: ["roles", "rolebindings"]
+  verbs: ["get", "list", "create", "update", "delete", "patch", "watch"]
+
+# Allow listing Namespaces
+- apiGroups: [""]
+  resources: ["namespaces"]
+  verbs: ["list", "get", "watch"]
