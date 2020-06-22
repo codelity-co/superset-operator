@@ -41,9 +41,14 @@ spec:
           {{- else }}
           emptyDir: {}
           {{- end }}
+        - name: tmp
+          emptyDir: {}
+        {{- range .Values.extraVolumes }}
+        - {{ . | toYaml | nindent 10 }}
+        {{- end }}
       {{- if .Values.image.pullSecrets }}
       imagePullSecrets:
-{{ toYaml .Values.image.pullSecrets | indent 8 }}
+        {{ toYaml .Values.image.pullSecrets | indent 8 }}
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
@@ -61,6 +66,9 @@ spec:
               mountPath: /home/superset
             - name: storage-volume
               mountPath: /var/lib/superset
+            {{- range .Values.extraVolumeMounts }}
+            - {{ . | toYaml | nindent 14 }}
+            {{- end }}
           ports:
             - name: http
               containerPort: 8088
@@ -100,4 +108,8 @@ spec:
       {{- with .Values.tolerations }}
       tolerations:
         {{- . | toYaml | nindent 8 }}
+      {{- end }}
+      {{- with .Values.initContainers }}
+      initContainers: 
+        {{ toYaml . | nindent 8}}
       {{- end }}
