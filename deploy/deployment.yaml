@@ -16,7 +16,7 @@ spec:
       containers:
         - name: superset-operator
           # Replace this with the built image name
-          image: gcr.io/codelity-co/superset-operator:latest
+          image: gcr.io/codelity-co/superset-operator:v0.4.0
           imagePullPolicy: Always
           env:
             - name: WATCH_NAMESPACE

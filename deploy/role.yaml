@@ -6,7 +6,7 @@ metadata:
 rules:
 
 # Allowed actions on CRD
-- apiGroups: ["charts.helm.k8s.io"]
+- apiGroups: ["helm.operator-sdk"]
   resources: ["supersets", "supersets/status"]
   verbs: ["get", "list", "create", "update", "delete", "watch"]
 
